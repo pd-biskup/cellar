@@ -1,5 +1,3 @@
-#! /usr/bin/bash
-
 function lsdll {
     WINEPREFIX=$BOTTLE_WINEPREFIX WINEARCH=$BOTTLE_BITNESS winetricks dlls list
 }
