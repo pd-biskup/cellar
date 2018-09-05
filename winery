@@ -1,0 +1,213 @@
+#! /usr/bin/bash
+
+function set_vars {
+    WINERY_BASE_PATH="$HOME/.winery/"
+    WINERY_BITNESS="win32"
+    WINERY_USAGE='usage:  winery <operation> [...]
+operations:
+  winery {h help} - show usage
+  winery {l list} - list bottles
+  winery {c create} <name> [options] - create bottle
+  winery {r remove} <name> - remove bottle'
+}
+
+function read_config {
+    if [[ -f "$WINERY_BASE_PATH/config" ]]
+    then
+        if [[ -d $WINERY_BASE_PATH ]]
+        then
+            mkdir $WINERY_BASE_PATH
+        fi
+        # change to /etc/winery/config
+        cp "$HOME/Code/bottler/config" "$WINERY_BASE_PATH"
+    fi
+}
+
+function args {
+    case $1 in
+        'list' | 'l')
+            WINERY_OP='l'
+            shift
+            args_l $@
+        ;;
+        'create' | 'c')
+            WINERY_OP='c'
+            shift
+            args_c $@
+        ;;
+        'remove' | 'r')
+            WINERY_OP='r'
+            shift
+            args_r $@
+        ;;
+        *)
+            WINERY_OP='h'
+        ;;
+    esac
+}
+
+function args_l {
+    while [[ -n $1 ]]
+    do
+        case $1 in
+            *)
+                WINERY_OP='h'
+                break
+            ;;
+        esac
+    done
+}
+
+function args_c {
+    if [[ -z $1 ]]
+    then
+        echo "$WINERY_USAGE"
+    else
+        WINERY_NAME="$1"
+        WINERY_WINEPREFIX="$WINERY_BASE_PATH/bottles/$1/wineprefix"
+        WINERY_BOTTLE_PATH="$WINERY_BASE_PATH/bottles/$1"
+        shift
+        while [[ -n $1 ]]
+        do
+            case $1 in
+            '-x86')
+                WINERY_BITNESS='win32'
+            ;;
+            '-x64')
+                WINERY_BITNESS='win64'
+            ;;
+            '-o')
+                shift
+                if [[ -z $1 ]]
+                then
+                    WINERY_OP='h'
+                else
+                    WINERY_WINEPREFIX="$1"
+                    WINERY_CUSTOM_PATH=1
+                fi
+            ;;
+            '-s')
+                WINERY_SEPARATED=1
+            ;;
+            *)
+                WINERY_OP='h'
+                break
+            ;;
+            esac
+            shift
+        done
+    fi
+}
+
+function args_r {
+    while [[ -n $1 ]]
+    do
+        case $1 in
+            *)
+                WINERY_NAME=$1
+                shift
+            ;;
+        esac
+    done
+}
+
+function list {
+    printf "   %-22s %-7s %-22s\n" "Name" "Bit" "Path"
+    echo "--------------------------------------------------------------------------------"
+    for DIR in $WINERY_BASE_PATH/bottles/*
+    do
+        if [[ -f $DIR/bottle ]]
+        then
+            WINERY_NAME=$(grep name= < "$DIR/bottle" | sed -e "s/name=//")
+            WINERY_BITNESS=$(grep bitness= < "$DIR/bottle" | sed -e "s/bitness=//")
+            WINERY_WINEPREFIX=$(grep wineprefix= < "$DIR/bottle" | sed -e "s/wineprefix=//")
+            if [[ $WINERY_NAME == $WINERY_ACTIVE ]]
+            then
+                WINERY_ACTIVE_="*"
+            else
+                WINERY_ACTIVE_=" "
+            fi
+            printf " %s %-22s %-7s %-22s\n" "$WINERY_ACTIVE_" "$WINERY_NAME" "$WINERY_BITNESS" "$WINERY_WINEPREFIX"
+        fi
+    done
+}
+
+function create {
+    mkdir -p "$WINERY_WINEPREFIX"
+    export WINEPREFIX="$WINERY_WINEPREFIX"
+    export WINEARCH="$WINERY_BITNESS"
+    echo "Creating wineprefix $WINERY_NAME..."
+    wine wineboot &> /dev/null
+    if [[ "$WINERY_CUSTOM_PATH" == 1 ]]
+    then
+        mkdir -p "$WINERY_BOTTLE_PATH"
+        ln -s "$WINERY_WINEPREFIX" "$WINERY_BOTTLE_PATH/wineprefix"
+    fi
+    if [[ "$WINERY_SEPARATED" == 1 ]]
+    then
+        rm -rf "$WINERY_WINEPREFIX/dosdevices/z:"
+        rm -rf "$WINERY_WINEPREFIX/drive_c/users/$USER/Desktop"
+        rm -rf "$WINERY_WINEPREFIX/drive_c/users/$USER/My Documents"
+        rm -rf "$WINERY_WINEPREFIX/drive_c/users/$USER/My Music"
+        rm -rf "$WINERY_WINEPREFIX/drive_c/users/$USER/My Pictures"
+        rm -rf "$WINERY_WINEPREFIX/drive_c/users/$USER/My Videos"
+        mkdir "$WINERY_WINEPREFIX/drive_c/users/$USER/Desktop"
+        mkdir "$WINERY_WINEPREFIX/drive_c/users/$USER/My Documents"
+        mkdir "$WINERY_WINEPREFIX/drive_c/users/$USER/My Music"
+        mkdir "$WINERY_WINEPREFIX/drive_c/users/$USER/My Pictures"
+        mkdir "$WINERY_WINEPREFIX/drive_c/users/$USER/My Videos"
+        touch "$WINERY_WINEPREFIX/drive_c/users/$USER/Desktop/.WINERY_NO_SYMLINK"
+        touch "$WINERY_WINEPREFIX/drive_c/users/$USER/My Documents/.WINERY_NO_SYMLINK"
+        touch "$WINERY_WINEPREFIX/drive_c/users/$USER/My Music/.WINERY_NO_SYMLINK"
+        touch "$WINERY_WINEPREFIX/drive_c/users/$USER/My Pictures/.WINERY_NO_SYMLINK"
+        touch "$WINERY_WINEPREFIX/drive_c/users/$USER/My Videos/.WINERY_NO_SYMLINK"
+    fi
+    mkdir "$WINERY_BOTTLE_PATH/shortcuts"
+    touch "$WINERY_BOTTLE_PATH/bottle"
+    echo "name=$WINERY_NAME" >> "$WINERY_BOTTLE_PATH/bottle"
+    echo "bitness=$WINERY_BITNESS" >> "$WINERY_BOTTLE_PATH/bottle"
+    echo "wineprefix=$WINERY_WINEPREFIX" >> "$WINERY_BOTTLE_PATH/bottle"
+}
+
+function delete {
+    if [[ -d "$WINERY_BASE_PATH/bottles/$WINERY_NAME" ]]
+    then
+        echo -n "Are you sure you want to delete wineprefix $WINERY_NAME? [Y/n] "
+        read WINERY_CONFIRM
+        if [[ $WINERY_CONFIRM == 'y' || $WINERY_CONFIRM == 'Y' || -z $WINERY_CONFIRM ]]
+        then
+            WINERY_WINEPREFIX=$(grep wineprefix < "$WINERY_BASE_PATH/bottles/$WINERY_NAME/bottle" | sed -e "s/wineprefix=//")
+            echo "Deleting wineprefix $WINERY_NAME..."
+            rm -rf "$WINERY_WINEPREFIX"
+            rm -rf "$WINERY_BASE_PATH/bottles/$WINERY_NAME"
+        fi
+    else
+        echo "No bottle named $WINERY_NAME"
+    fi
+}
+
+function help {
+    echo -e "$WINERY_USAGE"
+}
+
+function action {
+    case $WINERY_OP in
+        'l')
+            list
+        ;;
+        'c')
+            create
+        ;;
+        'r')
+            delete
+        ;;
+        'h')
+            help
+        ;;
+    esac
+}
+
+set_vars
+read_config
+args $@
+action

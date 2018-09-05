@@ -1,0 +1,5 @@
+#compdef _winery winery
+
+function _winery {
+    _values -s , l c r
+}

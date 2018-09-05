@@ -1,0 +1,8 @@
+#! /usr/bin/bash
+
+function uncork {
+    if [[ -z $WINERY_ACTIVE && -n $1 && -f "$HOME/.winery/bottles/$1/bottle" ]]
+    then
+	    source "$HOME/Code/bottler/_uncork" "$1"
+    fi
+}
