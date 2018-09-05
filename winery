@@ -1,5 +1,19 @@
 #! /usr/bin/bash
 
+function init {
+    if [[ -d "$HOME/.winery" ]]
+    then
+        mkdir "$HOME/.winery"
+    fi
+    if [[ -d "$HOME/.winery/bottles" ]]
+    then
+        mkdir "$HOME/.winery/bottles"
+    if [[ -f "$HOME/.winery/config" ]]
+    then
+        install -m644 "/usr/share/winery/config" "$HOME/.winery/config"
+    fi
+}
+
 function set_vars {
     WINERY_BASE_PATH="$HOME/.winery/"
     WINERY_BITNESS="win32"
@@ -207,6 +221,7 @@ function action {
     esac
 }
 
+init
 set_vars
 read_config
 args $@
