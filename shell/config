@@ -1,0 +1,12 @@
+# Winery config
+# Uncomment option to enable
+
+# Default directory for wineprefixes
+# WINEPREFIX_DIR=$HOME/.winery/bottles/
+
+# Default bitness of new wineprefixes.
+# Available options: win32, win64
+# DEFAULT_BITNESS=win32
+
+# If set to 1 new wineprefixes will be isolated from root filesystem
+# DEFAULT_ISOLATION=0
