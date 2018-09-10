@@ -1,0 +1,10 @@
+#! /bin/bash
+
+for SHORTCUT in $BOTTLE_DIR/shortcuts/*
+do
+    if [[ -x $SHORTCUT ]]
+    then
+        NAME=${SHORTCUT##*/}
+        echo "$NAME"
+    fi
+done

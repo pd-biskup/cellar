@@ -168,7 +168,7 @@ function list {
             WINERY_NAME=$(grep name= < "$DIR/bottle" | sed -e "s/name=//")
             WINERY_BITNESS=$(grep bitness= < "$DIR/bottle" | sed -e "s/bitness=//")
             WINERY_WINEPREFIX=$(grep wineprefix= < "$DIR/bottle" | sed -e "s/wineprefix=//")
-            if [[ $WINERY_NAME == $WINERY_ACTIVE ]]
+            if [[ "$WINERY_NAME" == "$WINERY_ACTIVE" ]]
             then
                 WINERY_ACTIVE_="*"
             else
@@ -194,7 +194,7 @@ function create {
             mkdir -p "$WINERY_BOTTLE"
             ln -s "$WINERY_WINEPREFIX" "$WINERY_BOTTLE/wineprefix"
         fi
-        if [[ "$WINERY_SEPARATED" == 1 ]]
+        if [[ "$WINERY_ISOLATION" == 1 ]]
         then
             rm -rf "$WINERY_WINEPREFIX/dosdevices/z:"
             rm -rf "$WINERY_WINEPREFIX/drive_c/users/$USER/Desktop"
@@ -218,6 +218,15 @@ function create {
         echo "name=$WINERY_NAME" >> "$WINERY_BOTTLE/bottle"
         echo "bitness=$WINERY_BITNESS" >> "$WINERY_BOTTLE/bottle"
         echo "wineprefix=$WINERY_WINEPREFIX" >> "$WINERY_BOTTLE/bottle"
+        install -m644 "/usr/share/winery/uncork" "$WINERY_BOTTLE/uncork"
+        sed -i -e "s,{{NAME}},$WINERY_NAME," "$WINERY_BOTTLE/uncork"
+        mkdir "$WINERY_BOTTLE/bin"
+        for SCRIPT in /usr/share/winery/scripts/*
+        do
+            SCRIPT_NAME="${SCRIPT##*/}"
+            install -m755 "$SCRIPT" "$WINERY_BOTTLE/bin/$SCRIPT_NAME"
+            sed -i -e "s,{{WINEPREFIX}},$WINERY_WINEPREFIX,g" -e "s,{{BITNESS}},$WINERY_BITNESS,g" "$WINERY_BOTTLE/bin/$SCRIPT_NAME"
+        done
     fi
 }
 

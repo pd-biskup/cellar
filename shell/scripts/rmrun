@@ -1,0 +1,13 @@
+#! /bin/bash
+
+if [[ -n $1 ]]
+then
+    if [[ -f "$BOTTLE_DIR/shortcuts/$1" ]]
+    then
+        rm -f "$BOTTLE_DIR/shortcuts/$1"
+    else
+        echo "Shortcut doesn't exist"
+    fi
+else
+    echo "No shortcut specified"
+fi

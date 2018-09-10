@@ -1,0 +1,3 @@
+#! /bin/bash
+
+find "{{WINEPREFIX}}" -type f -iname "*.exe"

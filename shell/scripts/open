@@ -1,0 +1,3 @@
+#! /bin/bash
+
+xdg-open "{{WINEPREFIX}}/drive_c"

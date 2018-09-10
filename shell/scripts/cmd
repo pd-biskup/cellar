@@ -1,0 +1,8 @@
+#! /bin/bash
+
+if [[ $1 == "-i" ]]
+then
+    env WINEPREFIX={{WINEPREFIX}} WINEARCH={{BITNESS}} wineconsole --backend=curses
+else
+    (env WINEPREFIX={{WINEPREFIX}} WINEARCH={{BITNESS}} wineconsole --backend=user &> /dev/null &)
+fi

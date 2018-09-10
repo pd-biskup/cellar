@@ -1,6 +1,31 @@
-function uncork {
-    if [[ -z $WINERY_ACTIVE && -n $1 && -f "$HOME/.winery/bottles/$1/bottle" ]]
-    then
-	    source "$HOME/Code/bottler/_uncork" "$1"
-    fi
+
+function cork {
+    nuke
+    export PATH=$OLD_PATH
+    export PS1=$OLD_PS1
+    unset OLD_PATH
+    unset OLD_PS1
+    unset WINERY_ACTIVE
+    unset BOTTLE_NAME
+    unset BOTTLE_DIR
+    unset BOTTLE_BITNESS
+    unset BOTTLE_WINEPREFIX
+    unset -f cork
+    hash -r
 }
+
+if [[ -z "$WINERY_ACTIVE" ]]
+then
+    export BOTTLE_NAME="{{NAME}}"
+    export WINERY_ACTIVE="$BOTTLE_NAME"
+    export BOTTLE_DIR="$HOME/.winery/bottles/$BOTTLE_NAME"
+    export BOTTLE_BITNESS=$(grep bitness= < $BOTTLE_DIR/bottle | sed -e "s/bitness=//")
+    export BOTTLE_WINEPREFIX=$(grep wineprefix= < $BOTTLE_DIR/bottle | sed -e "s/wineprefix=//")
+    export OLD_PATH=$PATH
+    export PATH="$BOTTLE_DIR/bin:$PATH"
+    export OLD_PS1=$PS1
+    export PS1="($BOTTLE_NAME) $PS1"
+    hash -r
+else
+    echo "Another bottle already uncorked"
+fi

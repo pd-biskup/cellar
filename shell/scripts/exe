@@ -1,0 +1,13 @@
+#! /bin/bash
+
+if [[ -n $1 ]]
+then
+    if [[ -f $1 ]]
+    then
+        (env WINEPREFIX={{WINEPREFIX}} WINEARCH={{BITNESS}} wine $1 &> /dev/null &)
+    else
+        echo "No such file"
+    fi
+else
+    echo "No file specified"
+fi

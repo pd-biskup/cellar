@@ -1,0 +1,78 @@
+#! /bin/bash
+
+if [[ -n $1 ]]
+then
+    NAME="$1"
+    if [[ -n $2 ]]
+    then
+        FILEPATH="$2"
+        if [[ -f "$2" ]]
+        then
+            shift 2
+            ARGS=()
+            ENVS=()
+            unset ERROR
+            while [[ -n $1 ]]
+            do
+                case $1 in
+                    '-a')
+                        if [[ -n $2 ]]
+                        then
+                            ARGS+=($2)
+                            shift 2
+                        else
+                            ERROR=1
+                            echo 'No argument specified'
+                            break
+                        fi
+                    ;;
+                    '-e')
+                        if [[ -n $2 ]]
+                        then
+                            ENVS+=($2)
+                            shift 2
+                        else
+                            ERROR=1
+                            echo 'No variable specified'
+                            break
+                        fi
+                    ;;
+                    *)
+                        ERROR=1
+                        echo 'Unrecognized argument'
+                        break
+                    ;;
+                esac
+            done
+            if [[ -z $ERROR ]]
+            then
+                SHORTCUT="$BOTTLE_DIR/shortcuts/$NAME"
+                if [[ ! -f "$SHORTCUT" ]]
+                then
+                    touch "$SHORTCUT"
+                    echo "export WINEPREFIX=$BOTTLE_WINEPREFIX" >> "$SHORTCUT"
+                    echo "export WINEARCH=$BOTTLE_BITNESS" >> "$SHORTCUT"
+                    for ENV in "${ENVS[@]}"
+                    do
+                        echo "export $ENV" >> "$SHORTCUT"
+                    done
+                        echo -n "wine \"$FILEPATH\" " >> "$SHORTCUT"
+                    for ARG in "${ARGS[@]}"
+                    do
+                        echo -n "$ARG " >> "$SHORTCUT"
+                    done
+                    echo "&> /dev/null &" >> "$SHORTCUT"
+                    chmod +x "$SHORTCUT"
+                else
+                    echo "Shortcut with this name already exists"
+                fi
+            fi
+        else
+            echo "File not exist"
+        fi
+    else
+        echo "No file specified"
+    fi
+else
+    echo "No name specified"
+fi

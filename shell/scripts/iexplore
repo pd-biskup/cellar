@@ -1,0 +1,8 @@
+#! /bin/bash
+
+if [[ -f "{{WINEPREFIX}}/drive_c/windows/system32/iexplore.exe" ]]
+then
+    (env WINEPREFIX={{WINEPREFIX}} WINEARCH={{BITNESS}} wine "{{WINEPREFIX}}/drive_c/windows/system32/iexplore.exe" &> /dev/null &)
+else
+    echo "iexplore.exe not found"
+fi

@@ -1,0 +1,18 @@
+#! /bin/bash
+
+if [[ -n $1 && -n $2 ]]
+then
+    if [[ -f "$BOTTLE_DIR/shortcuts/$1" ]]
+    then
+        if [[ ! -f "$BOTTLE_DIR/shortcuts/$2" ]]
+        then
+            mv "$BOTTLE_DIR/shortcuts/$1" "$BOTTLE_DIR/shortcuts/$2"
+        else
+            echo "Shortcut $2 already esist"
+        fi
+    else
+        echo "Shortcut $1 doesn't exist"
+    fi
+else
+    echo "No shortcut specified"
+fi

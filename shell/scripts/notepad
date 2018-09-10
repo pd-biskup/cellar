@@ -1,0 +1,8 @@
+#! /bin/bash
+
+if [[ -f "{{WINEPREFIX}}/drive_c/windows/notepad.exe" ]]
+then
+    (env WINEPREFIX={{WINEPREFIX}} WINEARCH={{BITNESS}} wine "{{WINEPREFIX}}/drive_c/windows/notepad.exe" &> /dev/null &)
+else
+    echo "notepad.exe not found"
+fi
