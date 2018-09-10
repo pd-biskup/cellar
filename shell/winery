@@ -227,6 +227,13 @@ function create {
             install -m755 "$SCRIPT" "$WINERY_BOTTLE/bin/$SCRIPT_NAME"
             sed -i -e "s,{{WINEPREFIX}},$WINERY_WINEPREFIX,g" -e "s,{{BITNESS}},$WINERY_BITNESS,g" "$WINERY_BOTTLE/bin/$SCRIPT_NAME"
         done
+        mkdir "$WINERY_BOTTLE/bin/winetricks"
+        for SCRIPT in /usr/share/winery/winetricks/*
+        do
+            SCRIPT_NAME="${SCRIPT##*/}"
+            install -m755 "$SCRIPT" "$WINERY_BOTTLE/bin/winetricks/$SCRIPT_NAME"
+            sed -i -e "s,{{WINEPREFIX}},$WINERY_WINEPREFIX,g" -e "s,{{BITNESS}},$WINERY_BITNESS,g" "$WINERY_BOTTLE/bin/winetricks/$SCRIPT_NAME"
+        done
     fi
 }
 

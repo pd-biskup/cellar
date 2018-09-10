@@ -25,6 +25,8 @@ install:
 	install -Dm644 shell/scripts/run $(SHAREDIR)/winery/scripts/run
 	install -Dm644 shell/scripts/rmrun $(SHAREDIR)/winery/scripts/rmrun
 	install -Dm644 shell/scripts/mvrun $(SHAREDIR)/winery/scripts/mvrun
+	install -Dm644 shell/winetricks/lstrick $(SHAREDIR)/winery/winetricks/lstrick
+	install -Dm644 shell/winetricks/trick $(SHAREDIR)/winery/winetricks/trick
 	install -Dm644 license $(LICENSEDIR)/winery/license
 
 uninstall:

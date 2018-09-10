@@ -1,0 +1,11 @@
+#! /bin/bash
+
+export WINEPREFIX={{WINEPREFIX}}
+export WINEARCH={{BITNESS}}
+
+if [[ $# -gt 0 ]]
+then
+    winetricks $@
+else
+    echo "No verb specified"
+fi

@@ -1,0 +1,41 @@
+#! /bin/bash
+
+export WINEPREFIX={{WINEPREFIX}}
+export WINEARCH={{BITNESS}}
+
+if [[ -z $1 ]]
+then
+    winetricks list-all
+else
+    if [[ $# -eq 1 ]]
+    then
+        case $1 in
+            'apps')
+                winetricks apps list
+            ;;
+            'benchmarks')
+                winetricks benchmarks list
+            ;;
+            'dlls')
+                winetricks dlls list
+            ;;
+            'fonts')
+                winetricks fonts list
+            ;;
+            'games')
+                winetricks games list
+            ;;
+            'settings')
+                winetricks settings list
+            ;;
+            'installed')
+                winetricks list-installed
+            ;;
+            *)
+                echo "Unrecognized parameter"
+            ;;
+        esac
+    else
+        echo "Unrecognized parameter"
+    fi
+fi
