@@ -7,6 +7,7 @@ LICENSEDIR=/usr/share/licenses
 install:
 	install -Dm755 shell/winery $(BINDIR)/winery
 	install -Dm644 shell/uncork $(SHAREDIR)/winery/uncork
+	install -Dm644 shell/logger $(SHAREDIR)/winery/logger
 	install -Dm644 shell/config $(SHAREDIR)/winery/config
 	install -Dm644 shell/scripts/lsexe $(SHAREDIR)/winery/scripts/lsexe
 	install -Dm644 shell/scripts/open $(SHAREDIR)/winery/scripts/open

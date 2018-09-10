@@ -1,4 +1,4 @@
 #! /bin/bash
 
-(env WINEPREFIX={{WINEPREFIX}} WINEARCH={{BITNESS}} wineboot -k &> /dev/null &)
+(env WINEPREFIX={{WINEPREFIX}} WINEARCH={{BITNESS}} wineboot -k > >("$BOTTLE_DIR/logger" $(command -v wineboot)) 2> >("$BOTTLE_DIR/logger" $(command -v wineboot) "-e") &)
 

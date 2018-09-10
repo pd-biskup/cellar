@@ -2,7 +2,7 @@
 
 if [[ -f "{{WINEPREFIX}}/drive_c/windows/system32/taskmgr.exe" ]]
 then
-    (env WINEPREFIX={{WINEPREFIX}} WINEARCH={{BITNESS}} wine "{{WINEPREFIX}}/drive_c/windows/system32/taskmgr.exe" &> /dev/null &)
+    (env WINEPREFIX={{WINEPREFIX}} WINEARCH={{BITNESS}} wine "{{WINEPREFIX}}/drive_c/windows/system32/taskmgr.exe" > >("$BOTTLE_DIR/logger" "{{WINEPREFIX}}/drive_c/windows/system32/taskmgr.exe") 2> >("$BOTTLE_DIR/logger" "{{WINEPREFIX}}/drive_c/windows/system32/taskmgr.exe" "-e") &)
 else
     echo "taskmgr.exe not found"
 fi

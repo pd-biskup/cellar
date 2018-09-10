@@ -2,7 +2,7 @@
 
 if [[ -f "{{WINEPREFIX}}/drive_c/windows/notepad.exe" ]]
 then
-    (env WINEPREFIX={{WINEPREFIX}} WINEARCH={{BITNESS}} wine "{{WINEPREFIX}}/drive_c/windows/notepad.exe" &> /dev/null &)
+    (env WINEPREFIX={{WINEPREFIX}} WINEARCH={{BITNESS}} wine "{{WINEPREFIX}}/drive_c/windows/notepad.exe" > >("$BOTTLE_DIR/logger" "{{WINEPREFIX}}/drive_c/windows/notepad.exe") 2> >("$BOTTLE_DIR/logger" "{{WINEPREFIX}}/drive_c/windows/notepad.exe" "-e") &)
 else
     echo "notepad.exe not found"
 fi

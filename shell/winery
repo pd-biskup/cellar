@@ -187,8 +187,11 @@ function create {
         mkdir -p "$WINERY_WINEPREFIX"
         export WINEPREFIX="$WINERY_WINEPREFIX"
         export WINEARCH="$WINERY_BITNESS"
+        install -m755 "/usr/share/winery/logger" "$WINERY_BOTTLE/logger"
+        sed -i -e "s,{{LOG}},$WINERY_BOTTLE/log," "$WINERY_BOTTLE/logger"
+        touch "$WINERY_BOTTLE/log"
         echo "Creating wineprefix $WINERY_NAME..."
-        wine wineboot &> /dev/null
+        wine wineboot > >("$WINERY_BOTTLE/logger" $(command -v wineboot)) 2> >("$WINERY_BOTTLE/logger" $(command -v wineboot) "-e")
         if [[ "$WINERY_CUSTOM_WINEPREFIX_DIR" == 1 ]]
         then
             mkdir -p "$WINERY_BOTTLE"

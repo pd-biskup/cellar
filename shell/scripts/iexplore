@@ -2,7 +2,7 @@
 
 if [[ -f "{{WINEPREFIX}}/drive_c/windows/system32/iexplore.exe" ]]
 then
-    (env WINEPREFIX={{WINEPREFIX}} WINEARCH={{BITNESS}} wine "{{WINEPREFIX}}/drive_c/windows/system32/iexplore.exe" &> /dev/null &)
+    (env WINEPREFIX={{WINEPREFIX}} WINEARCH={{BITNESS}} wine "{{WINEPREFIX}}/drive_c/windows/system32/iexplore.exe" > >("$BOTTLE_DIR/logger" "{{WINEPREFIX}}/drive_c/windows/system32/iexplore.exe") 2> >("$BOTTLE_DIR/logger" "{{WINEPREFIX}}/drive_c/windows/system32/iexplore.exe" "-e") &)
 else
     echo "iexplore.exe not found"
 fi
