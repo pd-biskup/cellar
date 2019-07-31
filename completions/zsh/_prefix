@@ -1,0 +1,6 @@
+#compdef _run run
+
+_run() {
+    compadd $(lsrun)
+    return 0
+}

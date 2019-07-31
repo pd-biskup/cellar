@@ -1,8 +1,8 @@
 #! /bin/bash
 
-if [[ -f "{{WINEPREFIX}}/drive_c/windows/regedit.exe" ]]
+if [[ -f "$BOTTLE_WINEPREFIX/drive_c/windows/regedit.exe" ]]
 then
-    (env WINEPREFIX={{WINEPREFIX}} WINEARCH={{BITNESS}} wine "{{WINEPREFIX}}/drive_c/windows/regedit.exe" > >("$BOTTLE_DIR/logger" "{{WINEPREFIX}}/drive_c/windows/regedit.exe") 2> >("$BOTTLE_DIR/logger" "{{WINEPREFIX}}/drive_c/windows/regedit.exe" "-e") &)
+    (env WINEPREFIX="$BOTTLE_WINEPREFIX" WINEARCH="$BOTTLE_BITNESS" wine "$BOTTLE_WINEPREFIX/drive_c/windows/regedit.exe" > >("$BOTTLE_DIR/logger" "$BOTTLE_WINEPREFIX/drive_c/windows/regedit.exe") 2> >("$BOTTLE_DIR/logger" "$BOTTLE_WINEPREFIX/drive_c/windows/regedit.exe" "-e") &)
 else
     echo "regedit.exe not found"
 fi

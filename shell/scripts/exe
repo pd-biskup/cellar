@@ -4,7 +4,8 @@ if [[ -n $1 ]]
 then
     if [[ -f $1 ]]
     then
-        (env WINEPREFIX={{WINEPREFIX}} WINEARCH={{BITNESS}} wine $1 > >("$BOTTLE_DIR/logger" "$1") 2> >("$BOTTLE_DIR/logger" "$1" "-e") &)
+        EXE_DIR=${1%/*}
+        (cd "$EXE_DIR" ; env WINEPREFIX="$BOTTLE_WINEPREFIX" WINEARCH="$BOTTLE_BITNESS" wine "$1" > >("$BOTTLE_DIR/logger" "$1") 2> >("$BOTTLE_DIR/logger" "$1" "-e") &)
     else
         echo "No such file"
     fi

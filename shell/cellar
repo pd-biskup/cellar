@@ -1,0 +1,339 @@
+#! /usr/bin/bash
+
+function init {
+    if [[ ! -d "$HOME/.cellar" ]]
+    then
+        mkdir "$HOME/.cellar"
+    fi
+    if [[ ! -d "$HOME/.cellar/bottles" ]]
+    then
+        mkdir "$HOME/.cellar/bottles"
+    fi
+    if [[ ! -f "$HOME/.cellar/config" ]]
+    then
+        install -m644 "/usr/share/cellar/config" "$HOME/.cellar/"
+    fi
+}
+
+function set_vars {
+    DIR="$HOME/.cellar/"
+    CONFIG="$DIR/config"
+    DEFAULT_WINEPREFIX_DIR="$DIR/bottles"
+    DEFAULT_BITNESS="win32"
+    DEFAULT_ISOLATION=""
+    USAGE='usage: cellar <operation> [...]
+operations:
+  cellar {h help} - show usage
+  cellar {l list} - list bottles
+  cellar {c create} <name> [options] - create bottle
+  cellar {u update} <name> - update bottle
+  cellar {r remove} <name> - remove bottle'
+}
+
+function read_config {
+    CONFIG=$(sed 's/#.*//' "$CONFIG")
+    WINEPREFIX_DIR=$(echo "$CONFIG" | grep 'WINEPREFIX_DIR=' | sed -e 's/WINEPREFIX_DIR=//')
+    if [[ -n $WINEPREFIX_DIR ]]
+    then
+        CUSTOM_WINEPREFIX_DIR=1
+        WINEPREFIX_DIR="$DEFAULT_WINEPREFIX_DIR"
+    fi
+    BITNESS=$(echo "$CONFIG" | grep 'DEFAULT_BITNESS=' | sed -e 's/DEFAULT_BITNESS=//')
+    if [[ -n $BITNESS ]]
+    then
+        BITNESS="$DEFAULT_BITNESS"
+    fi
+    ISOLATION=$(echo "$CONFIG" | grep 'DEFAULT_ISOLATION=' | sed -e 's/DEFAULT_ISOLATION=//')
+    if [[ -n $ISOLATION ]]
+    then
+        ISOLATION="$DEFAULT_ISOLATION"
+    fi
+}
+
+function args {
+    case $1 in
+        'list' | 'l')
+            OP='l'
+            shift
+            args_l $@
+        ;;
+        'create' | 'c')
+            OP='c'
+            shift
+            args_c $@
+        ;;
+        'update' | 'u')
+            OP='u'
+            shift
+            args_u $@
+        ;;
+        'remove' | 'r')
+            OP='r'
+            shift
+            args_r $@
+        ;;
+        *)
+            OP='h'
+        ;;
+    esac
+}
+
+function args_l {
+    while [[ -n $1 ]]
+    do
+        case $1 in
+            *)
+                OP='h'
+                break
+            ;;
+        esac
+    done
+}
+
+function args_u {
+    if [[ -z $1 ]]
+    then
+        OP='h'
+    else
+        NAME="$1"
+        if [[ -z $CUSTOM_WINEPREFIX_DIR ]]
+        then
+            WINEPREFIX="$WINEPREFIX_DIR/$1/wineprefix"
+        else
+            WINEPREFIX="$WINEPREFIX_DIR/$1"
+        fi
+        BOTTLE="$DIR/bottles/$1"
+        shift
+        WINEPREFIX=$(echo "$WINEPREFIX" | sed -e "s,~,$HOME,")
+        WINEPREFIX=$(realpath -ms "$WINEPREFIX")
+    fi
+}
+
+function args_c {
+    if [[ -z $1 ]]
+    then
+        OP='h'
+    else
+        NAME="$1"
+        if [[ -z $CUSTOM_WINEPREFIX_DIR ]]
+        then
+            WINEPREFIX="$WINEPREFIX_DIR/$1/wineprefix"
+        else
+            WINEPREFIX="$WINEPREFIX_DIR/$1"
+        fi
+        BOTTLE="$DIR/bottles/$1"
+        shift
+        while [[ -n $1 ]]
+        do
+            case $1 in
+            '-x86')
+                BITNESS='win32'
+            ;;
+            '-x64')
+                BITNESS='win64'
+            ;;
+            '-o')
+                shift
+                if [[ -z $1 ]]
+                then
+                    OP='h'
+                else
+                    WINEPREFIX="$1"
+                    CUSTOM_WINEPREFIX_DIR=1
+                fi
+            ;;
+            '-s')
+                ISOLATION=1
+            ;;
+            '-i')
+                ISOLATION=0
+            ;;
+            *)
+                OP='h'
+                break
+            ;;
+            esac
+            shift
+        done
+    fi
+    WINEPREFIX=$(echo "$WINEPREFIX" | sed -e "s,~,$HOME,")
+    WINEPREFIX=$(realpath -ms "$WINEPREFIX")
+}
+
+function args_r {
+    if [[ -z $1 ]]
+    then
+        OP='h'
+    else
+        NAME=$1
+        shift
+        while [[ -n $1 ]]
+        do
+            case $1 in
+                '-f' | '--force')
+                    FORCE=1
+                    shift
+                ;;
+                *)
+                    OP='h'
+                    break
+                ;;
+            esac
+        done
+    fi
+}
+
+function list {
+    printf "   %-22s %-7s %-22s\n" "Name" "Bit" "Location"
+    echo "--------------------------------------------------------------------------------"
+    for d in $DIR/bottles/*
+    do
+        if [[ -f $d/bottle ]]
+        then
+            NAME=$(grep name= < "$d/bottle" | sed -e "s/name=//")
+            BITNESS=$(grep bitness= < "$d/bottle" | sed -e "s/bitness=//")
+            WINEPREFIX=$(grep wineprefix= < "$d/bottle" | sed -e "s/wineprefix=//")
+            if [[ "$NAME" == "$BOTTLE_ACTIVE" ]]
+            then
+                ACTIVE_="*"
+            else
+                ACTIVE_=" "
+            fi
+            printf " %s %-22s %-7s %-22s\n" "$ACTIVE_" "$NAME" "$BITNESS" "$WINEPREFIX"
+        fi
+    done
+}
+
+function create {
+    if [[ -f "$BOTTLE/bottle" ]]
+    then
+        echo 'Bottle with this name already exists'
+    else
+        mkdir -p "$WINEPREFIX"
+        export WINEPREFIX="$WINEPREFIX"
+        export WINEARCH="$BITNESS"
+        install -m755 "/usr/share/cellar/logger" "$BOTTLE/logger"
+        sed -i -e "s,{{LOG}},$BOTTLE/log," "$BOTTLE/logger"
+        touch "$BOTTLE/log"
+        echo "Creating wineprefix $NAME..."
+        wine wineboot > >("$BOTTLE/logger" $(command -v wineboot)) 2> >("$BOTTLE/logger" $(command -v wineboot) "-e")
+        if [[ "$CUSTOM_WINEPREFIX_DIR" == 1 ]]
+        then
+            mkdir -p "$BOTTLE"
+            ln -s "$WINEPREFIX" "$BOTTLE/wineprefix"
+        fi
+        if [[ "$ISOLATION" == 1 ]]
+        then
+            rm -rf "$WINEPREFIX/dosdevices/z:"
+            rm -rf "$WINEPREFIX/drive_c/users/$USER/Desktop"
+            rm -rf "$WINEPREFIX/drive_c/users/$USER/My Documents"
+            rm -rf "$WINEPREFIX/drive_c/users/$USER/My Music"
+            rm -rf "$WINEPREFIX/drive_c/users/$USER/My Pictures"
+            rm -rf "$WINEPREFIX/drive_c/users/$USER/My Videos"
+            mkdir "$WINEPREFIX/drive_c/users/$USER/Desktop"
+            mkdir "$WINEPREFIX/drive_c/users/$USER/My Documents"
+            mkdir "$WINEPREFIX/drive_c/users/$USER/My Music"
+            mkdir "$WINEPREFIX/drive_c/users/$USER/My Pictures"
+            mkdir "$WINEPREFIX/drive_c/users/$USER/My Videos"
+            touch "$WINEPREFIX/drive_c/users/$USER/Desktop/.NO_SYMLINK"
+            touch "$WINEPREFIX/drive_c/users/$USER/My Documents/.NO_SYMLINK"
+            touch "$WINEPREFIX/drive_c/users/$USER/My Music/.NO_SYMLINK"
+            touch "$WINEPREFIX/drive_c/users/$USER/My Pictures/.NO_SYMLINK"
+            touch "$WINEPREFIX/drive_c/users/$USER/My Videos/.NO_SYMLINK"
+        fi
+        mkdir "$BOTTLE/shortcuts"
+        touch "$BOTTLE/bottle"
+        echo "name=$NAME" >> "$BOTTLE/bottle"
+        echo "bitness=$BITNESS" >> "$BOTTLE/bottle"
+        echo "wineprefix=$WINEPREFIX" >> "$BOTTLE/bottle"
+        install -m644 "/usr/share/cellar/uncork" "$BOTTLE/uncork"
+        sed -i -e "s,{{NAME}},$NAME," "$BOTTLE/uncork"
+        mkdir "$BOTTLE/bin"
+        for SCRIPT in /usr/share/cellar/scripts/*
+        do
+            SCRIPT_NAME="${SCRIPT##*/}"
+            install -m755 "$SCRIPT" "$BOTTLE/bin/$NAME"
+        done
+        mkdir "$BOTTLE/bin/winetricks"
+        for SCRIPT in /usr/share/cellar/winetricks/*
+        do
+            SCRIPT_NAME="${SCRIPT##*/}"
+            install -m755 "$SCRIPT" "$BOTTLE/bin/winetricks/$SCRIPT_NAME"
+        done
+    fi
+}
+
+function update {
+    if [[ ! -f "$BOTTLE/bottle" ]]
+    then
+        echo "Bottle with this name doesn't exists"
+    else
+        echo "Updating bottle $NAME..."
+        install -m755 "/usr/share/cellar/logger" "$BOTTLE/logger"
+        sed -i -e "s,{{LOG}},$BOTTLE/log," "$BOTTLE/logger"
+        install -m644 "/usr/share/cellar/uncork" "$BOTTLE/uncork"
+        sed -i -e "s,{{NAME}},$NAME," "$BOTTLE/uncork"
+        for SCRIPT in /usr/share/cellar/scripts/*
+        do
+            SCRIPT_NAME="${SCRIPT##*/}"
+            install -m755 "$SCRIPT" "$BOTTLE/bin/$NAME"
+        done
+        for SCRIPT in /usr/share/cellar/winetricks/*
+        do
+            SCRIPT_NAME="${SCRIPT##*/}"
+            install -m755 "$SCRIPT" "$BOTTLE/bin/winetricks/$SCRIPT_NAME"
+        done
+    fi
+}
+
+function delete {
+    if [[ -d "$DIR/bottles/$NAME" ]]
+    then
+        if [[ -z $FORCE ]]
+        then
+            echo -n "Are you sure you want to delete wineprefix $NAME? [Y/n] "
+            read CONFIRM
+        else
+            CONFIRM='y'
+        fi
+        if [[ "$CONFIRM" == 'y' || "$CONFIRM" == 'Y' || -z "$CONFIRM" ]]
+        then
+            WINEPREFIX=$(grep wineprefix < "$DIR/bottles/$NAME/bottle" | sed -e "s/wineprefix=//")
+            echo "Deleting wineprefix $NAME..."
+            rm -rf "$WINEPREFIX"
+            rm -rf "$DIR/bottles/$NAME"
+        fi
+    else
+        echo "No bottle named $NAME"
+    fi
+}
+
+function help {
+    echo -e "$USAGE"
+}
+
+function action {
+    case $OP in
+        'l')
+            list
+        ;;
+        'c')
+            create
+        ;;
+        'u')
+            update
+        ;;
+        'r')
+            delete
+        ;;
+        'h')
+            help
+        ;;
+    esac
+}
+
+init
+set_vars
+read_config
+args $@
+action

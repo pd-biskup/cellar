@@ -22,9 +22,9 @@ then
                 echo "E|$timestamp|$filepath|$line" >> "$LOG_FILE"
             done
         else
-            echo "Wrong parameter" >&2
+            echo "Wrong parameter: $@" >&2
         fi
     fi
 else
-    echo "Wrong parameter" >&2
+    echo "No parameter" >&2
 fi

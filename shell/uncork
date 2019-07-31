@@ -1,11 +1,10 @@
 
 function cork {
-    nuke
     export PATH=$OLD_PATH
     export PS1=$OLD_PS1
     unset OLD_PATH
     unset OLD_PS1
-    unset WINERY_ACTIVE
+    unset BOTTLE_ACTIVE
     unset BOTTLE_NAME
     unset BOTTLE_DIR
     unset BOTTLE_BITNESS
@@ -14,11 +13,11 @@ function cork {
     hash -r
 }
 
-if [[ -z "$WINERY_ACTIVE" ]]
+if [[ -z "$BOTTLE_ACTIVE" ]]
 then
     export BOTTLE_NAME="{{NAME}}"
-    export WINERY_ACTIVE="$BOTTLE_NAME"
-    export BOTTLE_DIR="$HOME/.winery/bottles/$BOTTLE_NAME"
+    export BOTTLE_ACTIVE="$BOTTLE_NAME"
+    export BOTTLE_DIR="$HOME/.cellar/bottles/$BOTTLE_NAME"
     export BOTTLE_BITNESS=$(grep bitness= < $BOTTLE_DIR/bottle | sed -e "s/bitness=//")
     export BOTTLE_WINEPREFIX=$(grep wineprefix= < $BOTTLE_DIR/bottle | sed -e "s/wineprefix=//")
     export OLD_PATH=$PATH

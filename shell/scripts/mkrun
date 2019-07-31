@@ -56,12 +56,13 @@ then
                     do
                         echo "export $ENV" >> "$SHORTCUT"
                     done
-                        echo -n "wine \"$FILEPATH\" " >> "$SHORTCUT"
+                    echo "cd \"${FILEPATH%/*}\"" >> "$SHORTCUT"
+                    echo -n "wine \"$FILEPATH\" " >> "$SHORTCUT"
                     for ARG in "${ARGS[@]}"
                     do
                         echo -n "$ARG " >> "$SHORTCUT"
                     done
-                    echo "> >("$BOTTLE_DIR/logger" "$FILEPATH") 2> >("$BOTTLE_DIR/logger" "$FILEPATH" "-e") &" >> "$SHORTCUT"
+                    echo "> >(\"$BOTTLE_DIR/logger\" \"$FILEPATH\") 2> >(\"$BOTTLE_DIR/logger\" \"$FILEPATH\" "-e") &" >> "$SHORTCUT"
                     chmod +x "$SHORTCUT"
                 else
                     echo "Shortcut with this name already exists"

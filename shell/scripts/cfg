@@ -1,4 +1,4 @@
 #! /bin/bash
 
-(env WINEPREFIX={{WINEPREFIX}} WINEARCH={{BITNESS}} winecfg > >("$BOTTLE_DIR/logger" $(command -v winecfg)) 2> >("$BOTTLE_DIR/logger" $(command -v winecfg) "-e") &)
+(env WINEPREFIX="$BOTTLE_WINEPREFIX" WINEARCH="$BOTTLE_BITNESS" winecfg > >("$BOTTLE_DIR/logger" $(command -v winecfg)) 2> >("$BOTTLE_DIR/logger" $(command -v winecfg) "-e") &)
 

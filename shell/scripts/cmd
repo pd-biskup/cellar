@@ -2,7 +2,7 @@
 
 if [[ $1 == "-i" ]]
 then
-    env WINEPREFIX={{WINEPREFIX}} WINEARCH={{BITNESS}} wineconsole --backend=curses 2> >("$BOTTLE_DIR/logger" $(command -v wineconsole) "-e")
+    env WINEPREFIX="$BOTTLE_WINEPREFIX" WINEARCH="$BOTTLE_BITNESS" wineconsole --backend=curses 2> >("$BOTTLE_DIR/logger" $(command -v wineconsole) "-e")
 else
-    (env WINEPREFIX={{WINEPREFIX}} WINEARCH={{BITNESS}} wineconsole --backend=user > >("$BOTTLE_DIR/logger" $(command -v wineconsole)) 2> >("$BOTTLE_DIR/logger" $(command -v wineconsole) "-e") &)
+    (env WINEPREFIX="$BOTTLE_WINEPREFIX" WINEARCH="$BOTTLE_BITNESS" wineconsole --backend=user > >("$BOTTLE_DIR/logger" $(command -v wineconsole)) 2> >("$BOTTLE_DIR/logger" $(command -v wineconsole) "-e") &)
 fi

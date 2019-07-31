@@ -1,8 +1,8 @@
 #! /bin/bash
 
-if [[ -f "{{WINEPREFIX}}/drive_c/windows/system32/control.exe" ]]
+if [[ -f "$BOTTLE_WINEPREFIX/drive_c/windows/system32/control.exe" ]]
 then
-    (env WINEPREFIX={{WINEPREFIX}} WINEARCH={{BITNESS}} wine "{{WINEPREFIX}}/drive_c/windows/system32/control.exe" > >("$BOTTLE_DIR/logger" "{{WINEPREFIX}}/drive_c/windows/system32/control.exe") 2> >("$BOTTLE_DIR/logger" "{{WINEPREFIX}}/drive_c/windows/system32/control.exe" "-e") &)
+    (env WINEPREFIX="$BOTTLE_WINEPREFIX" WINEARCH="$BOTTLE_BITNESS" wine "$BOTTLE_WINEPREFIX/drive_c/windows/system32/control.exe" > >("$BOTTLE_DIR/logger" "$BOTTLE_WINEPREFIX/drive_c/windows/system32/control.exe") 2> >("$BOTTLE_DIR/logger" "$BOTTLE_WINEPREFIX/drive_c/windows/system32/control.exe" "-e") &)
 else
     echo "control.exe not found"
 fi

@@ -2,7 +2,7 @@
 # Uncomment option to enable
 
 # Default directory for wineprefixes
-# WINEPREFIX_DIR=$HOME/.winery/bottles/
+# WINEPREFIX_DIR=$HOME/.cellar/bottles/
 
 # Default bitness of new wineprefixes.
 # Available options: win32, win64
