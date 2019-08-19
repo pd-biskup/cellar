@@ -36,15 +36,16 @@ function read_config {
     if [[ -n $WINEPREFIX_DIR ]]
     then
         CUSTOM_WINEPREFIX_DIR=1
+    else
         WINEPREFIX_DIR="$DEFAULT_WINEPREFIX_DIR"
     fi
     BITNESS=$(echo "$CONFIG" | grep 'DEFAULT_BITNESS=' | sed -e 's/DEFAULT_BITNESS=//')
-    if [[ -n $BITNESS ]]
+    if [[ ! -n $BITNESS ]]
     then
         BITNESS="$DEFAULT_BITNESS"
     fi
     ISOLATION=$(echo "$CONFIG" | grep 'DEFAULT_ISOLATION=' | sed -e 's/DEFAULT_ISOLATION=//')
-    if [[ -n $ISOLATION ]]
+    if [[ ! -n $ISOLATION ]]
     then
         ISOLATION="$DEFAULT_ISOLATION"
     fi
@@ -252,7 +253,7 @@ function create {
         for SCRIPT in /usr/share/cellar/scripts/*
         do
             SCRIPT_NAME="${SCRIPT##*/}"
-            install -m755 "$SCRIPT" "$BOTTLE/bin/$NAME"
+            install -m755 "$SCRIPT" "$BOTTLE/bin/$SCRIPT_NAME"
         done
         mkdir "$BOTTLE/bin/winetricks"
         for SCRIPT in /usr/share/cellar/winetricks/*
@@ -276,7 +277,7 @@ function update {
         for SCRIPT in /usr/share/cellar/scripts/*
         do
             SCRIPT_NAME="${SCRIPT##*/}"
-            install -m755 "$SCRIPT" "$BOTTLE/bin/$NAME"
+            install -m755 "$SCRIPT" "$BOTTLE/bin/$SCRIPT_NAME"
         done
         for SCRIPT in /usr/share/cellar/winetricks/*
         do
