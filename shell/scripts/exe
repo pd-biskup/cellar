@@ -5,7 +5,7 @@ then
     if [[ -f $1 ]]
     then
         EXE_DIR=${1%/*}
-        (cd "$EXE_DIR" ; env WINEPREFIX="$BOTTLE_WINEPREFIX" WINEARCH="$BOTTLE_BITNESS" wine "$1" > >("$BOTTLE_DIR/logger" "$1") 2> >("$BOTTLE_DIR/logger" "$1" "-e") &)
+        (cd "$EXE_DIR" ; env WINEPREFIX="$BOTTLE_WINEPREFIX" WINEARCH="$BOTTLE_BITNESS" wine "$1" &> >("$BOTTLE_DIR/logger" "$1") &)
     else
         echo "No such file"
     fi

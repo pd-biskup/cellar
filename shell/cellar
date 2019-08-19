@@ -243,6 +243,7 @@ function create {
             touch "$WINEPREFIX/drive_c/users/$USER/My Videos/.NO_SYMLINK"
         fi
         mkdir "$BOTTLE/shortcuts"
+        mkdir "$BOTTLE/logs"
         touch "$BOTTLE/bottle"
         echo "name=$NAME" >> "$BOTTLE/bottle"
         echo "bitness=$BITNESS" >> "$BOTTLE/bottle"
@@ -271,7 +272,6 @@ function update {
     else
         echo "Updating bottle $NAME..."
         install -m755 "/usr/share/cellar/logger" "$BOTTLE/logger"
-        sed -i -e "s,{{LOG}},$BOTTLE/log," "$BOTTLE/logger"
         install -m644 "/usr/share/cellar/uncork" "$BOTTLE/uncork"
         sed -i -e "s,{{NAME}},$NAME," "$BOTTLE/uncork"
         for SCRIPT in /usr/share/cellar/scripts/*
