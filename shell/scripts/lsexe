@@ -1,3 +1,31 @@
 #! /bin/bash
 
-find "$BOTTLE_WINEPREFIX" -type f -iname "*.exe"
+helptext="""lsexe - List .exe files in current wineprefix
+lsexe [<pattern>] [-s <suffix>]
+pattern   - filter result to files containing pattern
+-s suffix - filter results to files ending with .suffix
+-h        - show this message"""
+suffix='exe'
+pattern=''
+
+while [[ -n $1 ]]
+do
+    case $1 in
+        -s)
+            shift
+            suffix="$1"
+            shift
+            ;;
+        -h)
+            echo "$helptext"
+            exit
+            ;;
+        *)
+            pattern="*$1"
+            shift
+            ;;
+    esac
+done
+
+iname="$pattern*.$suffix"
+find "$BOTTLE_WINEPREFIX" -type f -iname "$iname"
